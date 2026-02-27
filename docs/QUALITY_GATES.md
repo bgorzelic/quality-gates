@@ -138,6 +138,7 @@ This creates the project with:
 ~/dev/quality-gates/
 ├── templates/_shared/     # All template files
 ├── hooks/                 # Claude Code hook scripts
+├── commands/              # Claude Code slash commands (/repo-polish)
 ├── scripts/               # create-project.sh
 ├── docs/                  # This file
 └── install.sh             # Deploy hooks + templates locally
@@ -146,6 +147,7 @@ This creates the project with:
 ### Installed Locations
 ```
 ~/.claude/hooks/           # Claude Code hooks (global)
+~/.claude/commands/        # Claude Code slash commands (global)
 ~/.claude/settings.json    # Hook config (global)
 ~/dev/.templates/_shared/  # Template copies (for other scripts)
 ```

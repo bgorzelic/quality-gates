@@ -6,6 +6,19 @@ Self-enforcing quality gates for every new project. Three layers of automated en
 - **Layer 1:** Git hooks — per-project lint, format, typecheck, secret scan (pre-commit or Lefthook)
 - **Layer 2:** CI — GitHub Actions with lint, typecheck, test, and security jobs
 
+## Prerequisites
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (for hooks and `/repo-polish` command)
+- [jq](https://jqlang.github.io/jq/) — required by `install.sh` and hook scripts (`brew install jq`)
+- [pre-commit](https://pre-commit.com/) — for Python project scaffolding (`pip install pre-commit`)
+- [git](https://git-scm.com/) 2.20+
+
+**Optional** (for specific templates):
+- [gitleaks](https://github.com/gitleaks/gitleaks) — secret scanning in git hooks (`brew install gitleaks`)
+- [Lefthook](https://github.com/evilmartians/lefthook) — alternative hook manager for Node projects (`brew install lefthook`)
+- [ruff](https://docs.astral.sh/ruff/), [mypy](https://mypy-lang.org/), [bandit](https://bandit.readthedocs.io/) — Python quality tools
+- [eslint](https://eslint.org/), [prettier](https://prettier.io/), [typescript](https://www.typescriptlang.org/) — Node quality tools
+
 ## Quick Start
 
 ```bash
@@ -56,7 +69,7 @@ create-project.sh <name> <type> [options]
 # Types: python, node, generic
 # Options:
 #   -d <dir>        Target directory (default: ~/dev/projects)
-#   --hooks <mgr>   pre-commit or lefthook (default: python→pre-commit, node→lefthook)
+#   --hooks <mgr>   pre-commit or lefthook (default: python->pre-commit, node->lefthook)
 ```
 
 Creates a fully configured project with git hooks installed and first commit ready.
@@ -72,6 +85,16 @@ cd ~/dev/projects/my-existing-repo
 
 This runs an adaptive audit and cleanup pass: identifies repo type, reports findings, then applies a conformity baseline (README, structure, release hygiene, CI) appropriate to that specific repo.
 
+## Updating Templates
+
+Edit files in `templates/_shared/`, then re-run `./install.sh` to deploy changes.
+
+For pre-commit hook version pins, you can also run `pre-commit autoupdate` inside any scaffolded project.
+
 ## Full Documentation
 
-See [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the complete reference.
+See [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the complete reference including architecture, troubleshooting, and file locations.
+
+## License
+
+[MIT](LICENSE)
