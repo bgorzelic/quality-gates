@@ -194,6 +194,22 @@ EOF
 cd "$PROJECT_DIR"
 git init -b main
 
+# pre-commit refuses to install when core.hooksPath is set globally
+# (e.g. by Lefthook shims at ~/.githooks). Temporarily unset it, install
+# hooks, then restore.
+GLOBAL_HOOKS_PATH=""
+if git config --global --get core.hooksPath &>/dev/null; then
+  GLOBAL_HOOKS_PATH=$(git config --global --get core.hooksPath)
+  git config --global --unset core.hooksPath
+fi
+
+restore_hooks_path() {
+  if [[ -n "$GLOBAL_HOOKS_PATH" ]]; then
+    git config --global core.hooksPath "$GLOBAL_HOOKS_PATH"
+  fi
+}
+trap restore_hooks_path EXIT
+
 # Install hook manager
 if [[ "$HOOK_MGR" == "pre-commit" ]]; then
   if command -v pre-commit &>/dev/null; then
@@ -210,6 +226,10 @@ elif [[ "$HOOK_MGR" == "lefthook" ]]; then
     echo "Warning: lefthook not found. Run 'brew install lefthook && lefthook install' to set up hooks."
   fi
 fi
+
+# Restore global hooks path immediately (trap also covers error cases)
+restore_hooks_path
+GLOBAL_HOOKS_PATH=""  # Prevent double-restore in trap
 
 # Initial commit
 git add -A

@@ -18,40 +18,41 @@ case "$FILE_PATH" in
   *.md|*.txt|*.example|*.template|*.rst) exit 0 ;;
 esac
 
-# Secret patterns
-PATTERNS=(
-  'AKIA[0-9A-Z]{16}'                           # AWS access key
-  '-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----' # Private key header
-  '"type":\s*"service_account"'                  # GCP service account JSON
-  'xoxb-[0-9]+-[0-9A-Za-z]+'                   # Slack bot token
-  'xoxp-[0-9]+-[0-9A-Za-z]+'                   # Slack user token
-  'ghp_[0-9A-Za-z]{36}'                         # GitHub personal access token
-  'gho_[0-9A-Za-z]{36}'                         # GitHub OAuth token
-  'ghs_[0-9A-Za-z]{36}'                         # GitHub server token
-  'sk-[0-9A-Za-z]{20}T3BlbkFJ[0-9A-Za-z]{20}'  # OpenAI API key
-)
-
-# Assignment patterns (key=value style secrets)
-ASSIGNMENT_PATTERNS=(
-  '(api_key|api_secret|apikey|apisecret)\s*[=:]\s*["\x27][A-Za-z0-9/+=]{16,}'
-  '(secret_key|private_key|access_token)\s*[=:]\s*["\x27][A-Za-z0-9/+=]{16,}'
-  '(password|passwd|pwd)\s*[=:]\s*["\x27][^\s"'\'']{8,}'
-)
-
-for pattern in "${PATTERNS[@]}"; do
-  if echo "$CONTENT" | grep -qE "$pattern"; then
-    echo "BLOCKED: content matches secret pattern: $pattern" >&2
+# Check for secret patterns using individual grep calls for macOS compatibility
+check_pattern() {
+  local label="$1"
+  local pattern="$2"
+  if printf '%s\n' "$CONTENT" | grep -qE -e "$pattern" 2>/dev/null; then
+    echo "BLOCKED: content contains $label" >&2
     echo "File: $FILE_PATH" >&2
     exit 2
   fi
-done
+}
 
-for pattern in "${ASSIGNMENT_PATTERNS[@]}"; do
-  if echo "$CONTENT" | grep -iqE "$pattern"; then
-    echo "BLOCKED: content contains potential secret assignment: $pattern" >&2
+# Token/key patterns
+check_pattern "AWS access key"          'AKIA[0-9A-Z]{16}'
+check_pattern "private key header"      '-----BEGIN.*PRIVATE KEY-----'
+check_pattern "GCP service account"     '"type":.*"service_account"'
+check_pattern "Slack bot token"         'xoxb-[0-9]+-[0-9A-Za-z]+'
+check_pattern "Slack user token"        'xoxp-[0-9]+-[0-9A-Za-z]+'
+check_pattern "GitHub PAT"             'ghp_[0-9A-Za-z]{36}'
+check_pattern "GitHub OAuth token"     'gho_[0-9A-Za-z]{36}'
+check_pattern "GitHub server token"    'ghs_[0-9A-Za-z]{36}'
+check_pattern "OpenAI API key"         'sk-[0-9A-Za-z]{20}T3BlbkFJ[0-9A-Za-z]{20}'
+
+# Assignment patterns (case-insensitive)
+check_assignment() {
+  local label="$1"
+  local pattern="$2"
+  if printf '%s\n' "$CONTENT" | grep -iqE -e "$pattern" 2>/dev/null; then
+    echo "BLOCKED: content contains $label" >&2
     echo "File: $FILE_PATH" >&2
     exit 2
   fi
-done
+}
+
+check_assignment "API key assignment"     '(api_key|api_secret|apikey|apisecret)[[:space:]]*[=:][[:space:]]*["][A-Za-z0-9/+=]{16,}'
+check_assignment "secret/token assignment" '(secret_key|private_key|access_token)[[:space:]]*[=:][[:space:]]*["][A-Za-z0-9/+=]{16,}'
+check_assignment "password assignment"     '(password|passwd|pwd)[[:space:]]*[=:][[:space:]]*["][^"]{8,}'
 
 exit 0
