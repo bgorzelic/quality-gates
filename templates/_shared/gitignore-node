@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+.next/
+.nuxt/
+.output/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.turbo/
+.eslintcache
+tsconfig.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / Credentials
+.env
+.env.*
+!.env.example
+credentials.json
+client_secret*.json
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+
+# Misc
+*.log
+*.bak
+*.tmp

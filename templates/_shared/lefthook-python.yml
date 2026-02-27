@@ -1,0 +1,37 @@
+# Lefthook config for Python projects
+# Install: lefthook install
+
+pre-commit:
+  parallel: true
+  commands:
+    ruff-check:
+      glob: "*.py"
+      run: ruff check --fix {staged_files}
+      stage_fixed: true
+    ruff-format:
+      glob: "*.py"
+      run: ruff format {staged_files}
+      stage_fixed: true
+    mypy:
+      glob: "*.py"
+      run: mypy {staged_files} --ignore-missing-imports
+    bandit:
+      glob: "*.py"
+      run: bandit -r {staged_files} -c pyproject.toml
+    gitleaks:
+      run: gitleaks protect --staged --no-banner
+      skip:
+        - run: "! command -v gitleaks >/dev/null 2>&1"
+
+pre-push:
+  parallel: true
+  commands:
+    pytest:
+      run: python -m pytest --tb=short -q
+    no-main:
+      run: |
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+          echo "Direct push to $branch blocked. Use a PR."
+          exit 1
+        fi

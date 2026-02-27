@@ -1,0 +1,33 @@
+.DEFAULT_GOAL := help
+SHELL := /bin/bash
+
+.PHONY: help verify install dev test lint format typecheck security clean
+
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+verify: lint typecheck test security ## Run all quality checks
+
+install: ## Install dependencies
+	npm ci
+
+dev: install ## Install dependencies + git hooks
+	npx lefthook install || pre-commit install
+
+test: ## Run tests with coverage
+	npx vitest run --coverage
+
+lint: ## Run linter
+	npx eslint .
+
+format: ## Format code
+	npx prettier --write .
+
+typecheck: ## Run type checker
+	npx tsc --noEmit
+
+security: ## Run security checks
+	npm audit --audit-level=high
+
+clean: ## Remove build artifacts
+	rm -rf node_modules/ dist/ build/ .cache/ coverage/
