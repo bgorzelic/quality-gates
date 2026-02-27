@@ -37,6 +37,18 @@ cp "$SCRIPT_DIR/scripts/create-project.sh" "$SCRIPTS_DIR/create-project.sh"
 chmod +x "$SCRIPTS_DIR/create-project.sh"
 echo "  Installed script: $SCRIPTS_DIR/create-project.sh"
 
+# --- Deploy Claude Code commands ---
+
+COMMANDS_DIR="$HOME/.claude/commands"
+mkdir -p "$COMMANDS_DIR"
+
+for cmd in "$SCRIPT_DIR"/commands/*.md; do
+  [[ -f "$cmd" ]] || continue
+  name=$(basename "$cmd")
+  cp "$cmd" "$COMMANDS_DIR/$name"
+  echo "  Installed command: $COMMANDS_DIR/$name (/$(basename "$name" .md))"
+done
+
 # --- Deploy docs ---
 
 DOCS_DIR="$HOME/dev/docs"
@@ -86,9 +98,13 @@ echo "Installation complete."
 echo ""
 echo "Installed:"
 echo "  - Claude Code hooks (global, active now)"
+echo "  - Claude Code commands (/repo-polish)"
 echo "  - Project templates (~/dev/.templates/_shared/)"
 echo "  - Scaffolding script (~/dev/scripts/create-project.sh)"
 echo "  - Documentation (~/dev/docs/QUALITY_GATES.md)"
 echo ""
 echo "Create a new project:"
 echo "  create-project.sh <name> python|node|generic"
+echo ""
+echo "Polish an existing repo:"
+echo "  cd <repo> && /repo-polish"

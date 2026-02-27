@@ -24,6 +24,7 @@ cd ~/dev/quality-gates
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | Claude Code hooks | `~/.claude/hooks/` | Global secret scan, commit msg validation |
+| Claude Code commands | `~/.claude/commands/` | `/repo-polish` slash command |
 | Settings update | `~/.claude/settings.json` | Registers hooks with Claude Code |
 | Templates | `~/dev/.templates/_shared/` | Pre-commit, Lefthook, CI, Makefile configs |
 | Scaffolding script | `~/dev/scripts/create-project.sh` | One-command project setup |
@@ -59,6 +60,17 @@ create-project.sh <name> <type> [options]
 ```
 
 Creates a fully configured project with git hooks installed and first commit ready.
+
+## Repo Polish Command
+
+For existing repos, use the `/repo-polish` slash command in Claude Code:
+
+```
+cd ~/dev/projects/my-existing-repo
+/repo-polish
+```
+
+This runs an adaptive audit and cleanup pass: identifies repo type, reports findings, then applies a conformity baseline (README, structure, release hygiene, CI) appropriate to that specific repo.
 
 ## Full Documentation
 
