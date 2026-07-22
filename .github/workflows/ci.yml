@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shellcheck all shell scripts
+        run: |
+          shellcheck --version
+          shellcheck install.sh hooks/*.sh scripts/*.sh
+
+  yaml-validate:
+    name: Validate YAML templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Parse every template YAML
+        run: |
+          python3 - <<'EOF'
+          import glob
+          import sys
+
+          import yaml
+
+          files = sorted(
+              glob.glob("templates/**/*.yml", recursive=True)
+              + glob.glob("templates/**/*.yaml", recursive=True)
+          )
+          if not files:
+              sys.exit("No YAML templates found under templates/ — check the glob.")
+
+          failed = False
+          for path in files:
+              try:
+                  with open(path) as fh:
+                      yaml.safe_load(fh)
+                  print(f"OK   {path}")
+              except yaml.YAMLError as exc:
+                  print(f"FAIL {path}: {exc}", file=sys.stderr)
+                  failed = True
+
+          sys.exit(1 if failed else 0)
+          EOF
