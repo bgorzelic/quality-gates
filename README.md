@@ -1,23 +1,46 @@
 # Quality Gates
 
-Self-enforcing quality gates for every new project. Three layers of automated enforcement:
+**One `./install.sh` gives every project three layers of automated quality enforcement — Claude Code hooks, git hooks, and CI — so secrets, lint failures, and broken tests are caught before they land.**
 
-- **Layer 0:** Claude Code hooks — global, always active, blocks secrets and dangerous commands
-- **Layer 1:** Git hooks — per-project lint, format, typecheck, secret scan (pre-commit or Lefthook)
-- **Layer 2:** CI — GitHub Actions with lint, typecheck, test, and security jobs
+![Shell](https://img.shields.io/badge/shell-bash-4EAA25?style=flat&logo=gnubash&logoColor=white)
+![Release](https://img.shields.io/github/v/release/bgorzelic/quality-gates?style=flat)
+![License](https://img.shields.io/github/license/bgorzelic/quality-gates?style=flat)
 
-## Prerequisites
+## The Three Layers
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (for hooks and `/repo-polish` command)
-- [jq](https://jqlang.github.io/jq/) — required by `install.sh` and hook scripts (`brew install jq`)
-- [pre-commit](https://pre-commit.com/) — for Python project scaffolding (`pip install pre-commit`)
-- [git](https://git-scm.com/) 2.20+
+| Layer | Where it runs | What it catches |
+|-------|---------------|-----------------|
+| **Layer 0 — Claude Code hooks** | Global, every Claude Code session | Secrets in file writes (**blocks**), non-conventional commit messages (warns) |
+| **Layer 1 — Git hooks** | Per project, on `git commit` / `git push` | Lint, format, type errors, secret scan — via pre-commit or Lefthook |
+| **Layer 2 — CI** | Per project, on every PR and push to main | Full test suite, typecheck, security scanning — via GitHub Actions |
 
-**Optional** (for specific templates):
-- [gitleaks](https://github.com/gitleaks/gitleaks) — secret scanning in git hooks (`brew install gitleaks`)
-- [Lefthook](https://github.com/evilmartians/lefthook) — alternative hook manager for Node projects (`brew install lefthook`)
-- [ruff](https://docs.astral.sh/ruff/), [mypy](https://mypy-lang.org/), [bandit](https://bandit.readthedocs.io/) — Python quality tools
-- [eslint](https://eslint.org/), [prettier](https://prettier.io/), [typescript](https://www.typescriptlang.org/) — Node quality tools
+Each layer catches a different failure mode: Layer 0 stops AI-assisted mistakes at the tool-call level, Layer 1 stops local developer mistakes at commit time, Layer 2 stops merge mistakes at review time.
+
+One command deploys all of it:
+
+```console
+$ ./install.sh
+Installing quality-gates...
+
+  Installed hook: ~/.claude/hooks/secret-scan.sh
+  Installed hook: ~/.claude/hooks/validate-commit-msg.sh
+  Installed template: ~/dev/.templates/_shared/ci-node.yml
+  Installed template: ~/dev/.templates/_shared/ci-python.yml
+  ...
+  Installed script: ~/dev/scripts/create-project.sh
+  Installed command: ~/.claude/commands/repo-polish.md (/repo-polish)
+  Installed doc: ~/dev/docs/QUALITY_GATES.md
+  Added secret-scan hook to settings.json
+  Added validate-commit-msg hook to settings.json
+
+Installation complete.
+```
+
+## What Is Quality Gates
+
+A self-enforcing quality system for every new project. Instead of remembering to set up linting, hooks, and CI per repo, you install this once: global Claude Code hooks become active immediately, and the `create-project.sh` scaffolder stamps out new Python/Node/generic projects with git hooks, CI workflows, Makefiles, and gitignores already wired up — first commit included.
+
+For repos that already exist, the bundled `/repo-polish` Claude Code slash command runs an adaptive audit-and-cleanup pass instead.
 
 ## Quick Start
 
@@ -31,6 +54,17 @@ cd ~/dev/quality-gates
 ~/dev/scripts/create-project.sh my-api python
 ~/dev/scripts/create-project.sh my-app node
 ```
+
+## Prerequisites
+
+| Tool | Needed for | Install |
+|------|------------|---------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Layer 0 hooks, `/repo-polish` | — |
+| [jq](https://jqlang.github.io/jq/) | `install.sh` and hook scripts | `brew install jq` |
+| [git](https://git-scm.com/) 2.20+ | Everything | — |
+| [pre-commit](https://pre-commit.com/) | Python project scaffolding | `pip install pre-commit` |
+
+**Optional** (for specific templates): [gitleaks](https://github.com/gitleaks/gitleaks), [Lefthook](https://github.com/evilmartians/lefthook), [ruff](https://docs.astral.sh/ruff/) / [mypy](https://mypy-lang.org/) / [bandit](https://bandit.readthedocs.io/) for Python, [eslint](https://eslint.org/) / [prettier](https://prettier.io/) / [typescript](https://www.typescriptlang.org/) for Node.
 
 ## What Gets Installed
 
