@@ -9,7 +9,7 @@ PROCESS (must follow):
 
 1) Identify repo intent + type (from code + existing docs)
 - Determine: app vs library vs CLI vs infra vs research/prototype vs docs-only vs mono-repo
-- Summarize the repo in 3-6 sentences in plain English.
+- Summarize the repo in 3-6 sentences in clear, accessible language.
 - List primary entrypoints (e.g., ./src, ./cmd, ./app, docker-compose, main.py, package.json scripts, etc.).
 - Decide what "good documentation" means for this repo type.
 
